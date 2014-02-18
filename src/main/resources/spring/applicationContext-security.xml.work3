@@ -1,0 +1,68 @@
+<bean:beans xmlns:bean="http://www.springframework.org/schema/beans"
+	xmlns="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+	<bean:bean id="securityContextPersistenceFilter"
+		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+		<bean:property name="forceEagerSessionCreation" value="true" />
+	</bean:bean>
+	<http auto-config="true" use-expressions="true">
+		<intercept-url pattern="/javax.faces.resource/**"
+			access="permitAll" />
+		<intercept-url pattern="/resources/freemarker/**"
+			access="permitAll" />
+		<intercept-url pattern="/signup/*" access="permitAll" />
+		<intercept-url pattern="/file/**" access="permitAll" />
+		<intercept-url pattern="/RememerMeLogin*" access="permitAll" />
+		<intercept-url pattern="/index*" access="permitAll" />
+		<intercept-url pattern="/openid*" access="permitAll" />
+		<intercept-url pattern="/register*" access="permitAll" />
+		<intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
+		<access-denied-handler error-page="/errors/accessdenied.jsf" />
+		<logout logout-url="/logout" logout-success-url="/RememerMeLogin.jsf" />
+		<form-login login-page="/RememerMeLogin.jsf"
+			login-processing-url="/securitycheck" username-parameter="username"
+			password-parameter="password" default-target-url="/member/home.jsf"
+			always-use-default-target="true" />
+		<remember-me key="remembermecoe7"
+			services-ref="rememberMeServices" />
+	</http>
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider
+			user-service-ref="registeringOpenIDAuthenticationUserDetailsService">
+			<password-encoder ref="encoder"></password-encoder>
+		</authentication-provider>
+	</authentication-manager>
+
+	<bean:bean id="encoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+
+
+	<bean:bean id="rememberMeServices"
+		class="org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices">
+		<bean:property name="tokenRepository" ref="jdbcTokenRepository" />
+		<bean:property name="userDetailsService" ref="registeringOpenIDAuthenticationUserDetailsService" />
+		<bean:property name="tokenValiditySeconds" value="864000" />
+		<bean:property name="cookieName" value="SPRING_RM" />
+		<bean:property name="key" value="remembermecoe7" />
+	</bean:bean>
+
+	<!-- Uses a database table to maintain a set of persistent login data -->
+	<bean:bean id="jdbcTokenRepository"
+		class="org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl">
+		<bean:property name="createTableOnStartup" value="false" />
+		<bean:property name="dataSource" ref="dataSource" />
+	</bean:bean>
+	<bean:bean id="rememberMeAuthenticationProvider"
+		class="org.springframework.security.authentication.RememberMeAuthenticationProvider">
+		<bean:property name="key" value="myAppKey" />
+	</bean:bean>
+	<bean:bean id="rememberMeFilter"
+		class="org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter">
+		<bean:property name="rememberMeServices" ref="rememberMeServices" />
+		<bean:property name="authenticationManager" ref="authenticationManager" />
+	</bean:bean>
+
+</bean:beans>

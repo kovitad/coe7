@@ -1,0 +1,97 @@
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+	<beans:bean id="springSecurityFilterChain"
+		class="org.springframework.security.web.FilterChainProxy">
+		<filter-chain-map path-type="ant">
+			<filter-chain pattern="/**" filters="securityContextPersistenceFilter"></filter-chain>
+		</filter-chain-map>
+	</beans:bean>
+	<beans:bean id="securityContextPersistenceFilter"
+		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+		<beans:property name="forceEagerSessionCreation" value="true"></beans:property>
+	</beans:bean>
+	<http pattern="/javax.faces.resource/**" security="none"></http>
+	<http pattern="/resources/freemarker/**" security="none"></http>
+	<http pattern="/file/**" security="none"></http>
+	<http pattern="/image/**" security="none"></http>
+	<http pattern="/login*" security="none" />
+	<http pattern="/index*" security="none" />
+	<http pattern="/openid*" security="none" />
+	<http pattern="/register*" security="none" />
+	<http auto-config="true" use-expressions="true">
+		<openid-login login-page="/openidlogin.jsf"
+			default-target-url="/member/home.jsf">
+			<attribute-exchange>
+				<openid-attribute name="email"
+					type="http://schema.openid.net/contact/email" required="true" />
+				<openid-attribute name="fullname"
+					type="http://schema.openid.net/namePerson" required="true" />
+			</attribute-exchange>
+		</openid-login>
+		<logout delete-cookies="JSESSIONID" />
+		<intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
+		<access-denied-handler ref="customAccessDeniedHandler"></access-denied-handler>
+		<remember-me services-ref="rememberMeServices" />
+		
+		<!-- <openid-login login-page="/login.jsf" default-target-url="/member/home.jsf" 
+			user-service-ref="registeringOpenIDAuthenticationUserDetailsService" always-use-default-target="true"> 
+			<attribute-exchange> <openid-attribute name="email" type="http://schema.openid.net/contact/email" 
+			required="true" /> </attribute-exchange> </openid-login> -->
+
+	</http>
+	<global-method-security secured-annotations="enabled"
+		authentication-manager-ref="authenticationManager">
+	</global-method-security>
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider
+			user-service-ref="registeringOpenIDAuthenticationUserDetailsService">
+			<password-encoder ref="encoder" />
+		</authentication-provider>
+		<authentication-provider ref="rememberMeAuthenticationProvider" />
+	</authentication-manager>
+<!--  
+	<beans:bean id="openIdAuthProvider"
+		class="org.springframework.security.openid.OpenIDAuthenticationProvider">
+		<beans:property name="authenticationUserDetailsService"
+			ref="registeringOpenIDAuthenticationUserDetailsService" />
+	</beans:bean>
+-->
+	<beans:bean id="encoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	<!-- Defines which remember me implementation to use - in this case using 
+		a database table to log 'remembered' tokens -->
+
+	<beans:bean id="rememberMeServices"
+		class="org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices">
+		<beans:property name="tokenRepository" ref="jdbcTokenRepository"></beans:property>
+		<beans:property name="userDetailsService" ref="registeringOpenIDAuthenticationUserDetailsService"></beans:property>
+		<beans:property name="tokenValiditySeconds" value="864000"></beans:property>
+		<beans:property name="cookieName" value="SPRING_RM"></beans:property>
+		<beans:property name="key" value="myAppKey"></beans:property>
+	</beans:bean>
+
+	<!-- Uses a database table to maintain a set of persistent login data -->
+	<beans:bean id="jdbcTokenRepository"
+		class="org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl">
+		<beans:property name="createTableOnStartup" value="false"></beans:property>
+		<beans:property name="dataSource" ref="dataSource"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="rememberMeAuthenticationProvider"
+		class="org.springframework.security.authentication.RememberMeAuthenticationProvider">
+
+		<beans:property name="key" value="myAppKey"></beans:property>
+	</beans:bean>
+	<beans:bean id="rememberMeFilter"
+		class="org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter">
+		<beans:property name="rememberMeServices" ref="rememberMeServices"></beans:property>
+		<beans:property name="authenticationManager" ref="authenticationManager"></beans:property>
+	</beans:bean>
+
+</beans:beans>

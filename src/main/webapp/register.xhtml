@@ -1,0 +1,120 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<h:head>
+		<f:facet name="first">
+			<meta content='text/html; charset=UTF-8' http-equiv="Content-Type" />
+			<title>PrimeFaces - ShowCase</title>
+			<link rel="shortcut icon" type="image/png"
+				href="#{request.contextPath}/images/favicon.png" />
+		</f:facet>
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/syntaxhighlighter/syntaxhighlighter.css" />
+
+		<ui:insert name="head"></ui:insert>
+
+		<script type="text/javascript">
+			$(function() {
+				$('.sidebar a').hover(function() {
+					$(this).toggleClass('ui-state-hover');
+				})
+			});
+		</script>
+
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push([ '_setAccount', 'UA-12200033-3' ]);
+			_gaq.push([ '_trackPageview' ]);
+
+			(function() {
+				var ga = document.createElement('script');
+				ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+						: 'http://www')
+						+ '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+	</h:head>
+	<h:body>
+		<p:spacer height="20px;" width="100%"></p:spacer>
+		<center>
+			<h:form>
+				<p:panel header="Registration" closable="true"  style="height:80%;width:50%;">
+					<p:panelGrid columns="2" cellpadding="5">
+
+						<h:outputText value="Title: " />
+						<p:inputText value="#{memberRegistrationBean.member.title}"
+							id="registerTitle" />
+
+						<h:outputText value="First Name: *" />
+						<p:inputText value="#{memberRegistrationBean.member.firstName}"
+							id="registerFirstname" required="true" />
+
+						<h:outputText value="Last Name: *" />
+						<p:inputText value="#{memberRegistrationBean.member.lastName}"
+							id="registerLastname" required="true" />
+
+						<h:outputText value="Date Of Birth: " />
+						<p:calendar value="#{memberRegistrationBean.member.dateOfBirth}"
+							id="registerDateOfBirth" />
+
+						<h:outputText value="Phone: " />
+						<p:inputMask value="#{memberRegistrationBean.member.phoneNumber}"
+							id="registerPhoneNumber" mask="(999) 999-9999" />
+
+						<h:outputText value="Email Address: *" required="true" />
+						<p:inputText value="#{memberRegistrationBean.member.emailAddress}"
+							id="registerEmail" />
+
+						<h:outputText value="User Name: * " required="true" />
+						<p:inputText value="#{memberRegistrationBean.member.username}"
+							id="registerUserName" />
+
+						<h:outputLabel for="pwd1" value="Password 1: *" />
+						<p:password id="pwd1"
+							value="#{memberRegistrationBean.member.password}" match="pwd2"
+							label="Password 1" required="true" />
+
+						<h:outputLabel for="pwd2" value="Password 2: *" />
+						<p:password id="pwd2"
+							value="#{memberRegistrationBean.member.password}"
+							label="Password 2" required="true" />
+
+						<p:commandButton value="Reset" type="reset" />
+						<p:commandButton value="Submit" update="display"
+							actionListener="#{memberRegistrationBean.register}"
+							oncomplete="PF('dlg').show()" />
+
+					</p:panelGrid>
+
+				</p:panel>
+				<p:dialog widgetVar="dlg" modal="true">
+					<h:panelGrid id="display" columns="2" cellpadding="5">
+
+						<h:outputText value="First Name: " />
+						<h:outputText value="#{memberRegistrationBean.member.firstName}" />
+
+						<h:outputText value="First Name: " />
+						<h:outputText value="#{memberRegistrationBean.member.lastName}" />
+
+						<h:outputText value="Date Of Birth: " />
+						<h:outputText value="#{memberRegistrationBean.member.dateOfBirth}" />
+
+						<h:outputText value="Phone: " />
+						<h:outputText value="#{memberRegistrationBean.member.phoneNumber}" />
+
+					</h:panelGrid>
+				</p:dialog>
+
+			</h:form>
+		</center>
+	</h:body>
+</ui:composition>
